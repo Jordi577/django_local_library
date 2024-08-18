@@ -83,6 +83,15 @@ class Book(models.Model):
     def __str__(self):
         """String for representing the Model object."""
         return self.title
+        
+    # Genre has a ManyToMany-Relationship with Book. Django
+    # prevents this, because of the cost of doing so. Instead
+    # we have to define our own get_genre_name function.
+    def display_genre(self):
+        return ', '.join(genre.name for genre in self.genre.all()[:3])
+    
+    # This will be displayed in the admin interface
+    display_genre.short_description = 'Genre'
 
     def get_absolute_url(self):
         """Returns the URL to access a detail record for this book."""
@@ -96,8 +105,12 @@ class BookInstance(models.Model):
     book = models.ForeignKey('Book', on_delete=models.RESTRICT, null=True)
     imprint = models.CharField(max_length=200)
     due_back = models.DateField(null=True, blank=True)
-    test = "Hi"
-    LOAN_STATUS = (('m', 'Maintenance'), ('o', 'On loan'), ('a', 'Available'), ('r', 'Reserved'),)
+    LOAN_STATUS = (
+        ('m', 'Maintenance'), 
+        ('o', 'On loan'), 
+        ('a', 'Available'), 
+        ('r', 'Reserved'),
+        )
 
     status = models.CharField(max_length=1, choices=LOAN_STATUS, blank=True, default='m', help_text='Book availability',)
 
