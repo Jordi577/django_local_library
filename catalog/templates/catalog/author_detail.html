@@ -1,0 +1,43 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Author: {{ author.last_name }}, {{author.first_name }}</h1> 
+    {% if author.date_of_birth %}
+      {{ author.date_of_birth }} </p>
+    {% else %}
+      <p> </p>
+    {% endif %} 
+
+    {% if author.date_of_death %}
+      {{ author.date_of_death }} </p>
+    {% else %}
+      <p> </p>
+    {% endif %}
+  
+    <h4> Book(s): </h4>
+  <!--  The function author.book_set.all returns all books associated 
+        with the author  -->
+  {% for book in author.book_set.all %}
+    <p style="color:blue"> {{ book.title }} </p>
+    <p> {{ book.summary }} </p>
+  {% endfor %}
+
+{% endblock %}
+
+{% block pagination %}
+    {% if is_paginated %}
+        <div class="pagination">
+            <span class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
+                {% endif %}
+                <span class="page-current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
+  {% endblock %}
