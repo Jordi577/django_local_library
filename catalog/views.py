@@ -6,6 +6,10 @@ from django.shortcuts import render
 # Create your views here.
 
 from .models import Book, Author, BookInstance, Genre
+# For function based view simple add decorator @login_required
+from django.contrib.auth.decorators import login_required
+# For class based view
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # function based view
 def index(request):
@@ -53,8 +57,31 @@ def index(request):
 
 # class based view
 from django.views import generic 
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
-class BookListView(generic.ListView):
+class SeeAllBorrowersView(PermissionRequiredMixin, generic.ListView):
+    permission_required = 'catalog.can_see_borrowers'
+    model = BookInstance 
+    template_name = 'catalog/borrowers_list.html'
+
+class LoanedBooksByUserListView(LoginRequiredMixin, generic.ListView):
+    """ Generic class based view only available to current user """
+    model = BookInstance
+    template_name = 'catalog/bookinstance_list_borrowed_user.html'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return (
+            BookInstance.objects.filter(borrower=self.request.user)
+            .filter(status__exact='o')
+            .order_by('due_back')
+        )
+
+class BookListView(LoginRequiredMixin, generic.ListView):
+    # If user is not authenticated, user will be redirected to /login/
+    login_url = '/accounts/login'
+    redirect_field_name = 'redirect_to'
+
     # The generic view will query the database to get all records for the specified model
     # then render a template located at /catalog/templates/catalog/book_list.html 
     # Within the template we can acess the list of books with the template 
